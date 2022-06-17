@@ -1,42 +1,42 @@
 <template>
-  <q-layout view="hHr lpR fFr">
-    <q-header elevated class="bg-primary text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
-          </q-avatar>
-          QuasarChat
-        </q-toolbar-title>
-
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-      <!-- drawer content -->
-    </q-drawer>
+  <q-layout view="hHr lpR fFr" v-if="userGoogle !== false">
+    <Navbar />
 
     <q-page-container>
       <router-view />
     </q-page-container>
 
-    <q-footer elevated class="primary">
-      <q-toolbar>
-        <q-toolbar-title>
-          <div>Footer</div>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-footer>
+    <FooterAdd />
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, provide } from "vue";
+import { useQuasar, QSpinnerFacebook } from "quasar";
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import Navbar from "src/components/Navbar.vue";
+import FooterAdd from "src/components/FooterAdd.vue";
 
-const rightDrawerOpen = ref(false);
+const $q = useQuasar();
+const userGoogle = ref(false);
+provide("userGoogle", userGoogle);
 
-const toggleRightDrawer = () => {
-  rightDrawerOpen.value = !rightDrawerOpen.value;
+onAuthStateChanged(auth, (user) => {
+  showLoading();
+  setTimeout(() => {
+    userGoogle.value = user;
+    $q.loading.hide();
+  }, 1000);
+});
+
+const showLoading = () => {
+  $q.loading.show({
+    spinner: QSpinnerFacebook,
+    spinnerColor: "primary",
+    spinnerSize: 140,
+    backgroundColor: "primary",
+    messageColor: "black",
+  });
 };
 </script>
